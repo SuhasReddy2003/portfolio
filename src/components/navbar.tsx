@@ -13,7 +13,7 @@ const links = [
 ];
 
 const GITHUB_URL = "https://github.com/SuhasReddy2003";
-const LINKEDIN_URL = "https://www.linkedin.com/in/YOUR-LINKEDIN-HANDLE";
+const LINKEDIN_URL = "https://www.linkedin.com/in/suhas-reddy-05643b247/";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);

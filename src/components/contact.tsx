@@ -1,8 +1,8 @@
 import { Github, Linkedin, Mail } from "lucide-react";
 
 const GITHUB_URL = "https://github.com/SuhasReddy2003";
-const LINKEDIN_URL = "https://www.linkedin.com/in/YOUR-LINKEDIN-HANDLE";
-const EMAIL = "YOUR_EMAIL@example.com";
+const LINKEDIN_URL = "https://www.linkedin.com/in/suhas-reddy-05643b247/";
+const EMAIL = "suhasreddy2003.sr@gmail.com";
 
 export function Contact() {
   return (
