@@ -140,14 +140,40 @@ function ProjectVisual({ project }: { project: Project }) {
       return (
         <PipelineFlow
           size="lg"
+          pulse
           nodes={[
-            { label: "User Question" },
-            { label: "Embedding" },
-            { label: "Vector Search" },
-            { label: "Relevant Knowledge" },
-            { label: "LLM", accent: true },
-            { label: "Suggested Response" },
-            { label: "Human Review", sublabel: "edge cases only", branch: true },
+            {
+              label: "User Question",
+              explain: "A customer submits a support ticket in natural language.",
+            },
+            {
+              label: "Embedding",
+              explain: "The question is converted into a vector representation.",
+            },
+            {
+              label: "Vector Search",
+              explain: "Retrieves semantically similar knowledge using pgvector.",
+            },
+            {
+              label: "Relevant Knowledge",
+              explain: "The closest-matching chunks from the knowledge base.",
+            },
+            {
+              label: "LLM",
+              accent: true,
+              explain: "Generates a grounded response from the retrieved context.",
+            },
+            {
+              label: "Suggested Response",
+              explain: "Auto-sent for high-confidence matches — 70%+ of routine queries.",
+            },
+            {
+              label: "Human Review",
+              sublabel: "edge cases only",
+              branch: true,
+              explain: "An agent queue handles anything outside the confidence range.",
+              mockButtons: ["Accept", "Edit", "Reject"],
+            },
           ]}
         />
       );

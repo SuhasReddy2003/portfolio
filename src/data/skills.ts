@@ -4,15 +4,15 @@ export const skills: { category: string; items: string[] }[] = [
     items: ["Python", "C++", "Java", "JavaScript", "TypeScript", "Go", "C", "SQL", "HTML", "CSS"],
   },
   {
-    category: "Frameworks",
-    items: ["React", "Next.js", "Node.js", "Django", "REST APIs"],
+    category: "Software Engineering",
+    items: ["React", "Next.js", "Node.js", "Django", "REST APIs", "Git"],
   },
   {
     category: "AI / ML",
-    items: ["OpenAI API", "RAG Pipelines", "Scikit-Learn", "Pandas", "NumPy", "NLP"],
+    items: ["OpenAI API", "RAG Pipelines", "NLP", "Scikit-Learn", "Pandas", "NumPy"],
   },
   {
-    category: "Infrastructure",
-    items: ["AWS", "Docker", "Kubernetes", "Terraform", "Vercel", "CI/CD", "WebAssembly", "MongoDB", "Supabase", "Git"],
+    category: "Data / Infrastructure",
+    items: ["PostgreSQL", "MongoDB", "Supabase", "Docker", "Kubernetes", "Terraform", "AWS", "Vercel", "CI/CD", "WebAssembly"],
   },
 ];

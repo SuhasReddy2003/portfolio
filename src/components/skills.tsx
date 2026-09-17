@@ -5,21 +5,16 @@ export function Skills() {
     <section id="skills" className="border-b border-border">
       <div className="container-page py-20 sm:py-24">
         <h2 className="text-2xl font-medium tracking-tight sm:text-3xl">Technical Skills</h2>
+        <p className="mt-2 text-muted">The stack behind the projects above.</p>
 
-        <div className="mt-10 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 flex flex-col divide-y divide-border border-t border-border">
           {skills.map((group) => (
-            <div key={group.category}>
-              <h3 className="font-mono text-xs uppercase tracking-wide text-muted">{group.category}</h3>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {group.items.map((item) => (
-                  <span
-                    key={item}
-                    className="rounded border border-border px-2 py-0.5 font-mono text-xs text-text"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
+            <div
+              key={group.category}
+              className="flex flex-col gap-2 py-4 sm:flex-row sm:items-baseline sm:gap-8"
+            >
+              <h3 className="w-44 shrink-0 text-sm text-muted">{group.category}</h3>
+              <p className="text-sm leading-relaxed text-text/90">{group.items.join(" · ")}</p>
             </div>
           ))}
         </div>

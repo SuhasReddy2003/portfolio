@@ -51,6 +51,18 @@ body {
   }
 }
 
+@keyframes pipeline-pulse {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .container-page {
   max-width: 72rem;
   margin-inline: auto;
