@@ -1,6 +1,6 @@
 import { ArrowRight, FileText, Github, Linkedin, Mail } from "lucide-react";
 
-const RESUME_URL = "public/Resume_Suhas.pdf";
+const RESUME_URL = "/resume.pdf";
 const GITHUB_URL = "https://github.com/SuhasReddy2003";
 const LINKEDIN_URL = "https://www.linkedin.com/in/suhas-reddy-05643b247/";
 const EMAIL = "suhasreddy2003.sr@gmail.com";
@@ -11,7 +11,7 @@ export function Hero() {
       <GridBackdrop />
       <div className="container-page relative flex flex-col gap-8 py-24 sm:py-32">
         <div className="max-w-2xl animate-[fade-up_0.5s_ease-out]">
-          <h1 className="text-4xl font-medium leading-[1.1] tracking-tight sm:text-5xl">
+          <h1 className="text-4xl font-medium leading-[1.1] tracking-tight sm:text-6xl">
             Software Engineer building intelligent systems.
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
@@ -39,15 +39,15 @@ export function Hero() {
             </a>
           </div>
 
-          <div className="mt-8 flex items-center gap-4 text-muted">
+          <div className="mt-8 flex items-center gap-5 text-muted">
             <a href={GITHUB_URL} target="_blank" rel="noreferrer" aria-label="GitHub" className="transition-colors hover:text-text">
-              <Github size={18} />
+              <Github size={20} />
             </a>
             <a href={LINKEDIN_URL} target="_blank" rel="noreferrer" aria-label="LinkedIn" className="transition-colors hover:text-text">
-              <Linkedin size={18} />
+              <Linkedin size={20} />
             </a>
             <a href={`mailto:${EMAIL}`} aria-label="Email" className="transition-colors hover:text-text">
-              <Mail size={18} />
+              <Mail size={20} />
             </a>
           </div>
         </div>
@@ -67,7 +67,7 @@ function GridBackdrop() {
           <path
             d="M 48 0 L 0 0 0 48"
             fill="none"
-            stroke="var(--border)"
+            stroke="var(--grid-line)"
             strokeWidth="1"
           />
         </pattern>

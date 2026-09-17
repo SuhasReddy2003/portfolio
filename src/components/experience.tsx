@@ -19,10 +19,10 @@ export function Experience() {
                   className="absolute left-[3px] top-4 h-[calc(100%-1rem)] w-px bg-border"
                 />
                 <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between">
-                  <h3 className="font-medium">{entry.role} — {entry.company}</h3>
-                  <span className="text-sm text-muted">{entry.dates}</span>
+                <h3 className="font-medium">{entry.role} — {entry.company}</h3>
+                {entry.dates && <span className="text-sm text-muted">{entry.dates}</span>}
                 </div>
-                <p className="text-sm text-muted">{entry.location}</p>
+                {entry.location && <p className="text-sm text-muted">{entry.location}</p>}
                 <ul className="mt-3 flex flex-col gap-1.5">
                   {entry.bullets.map((b) => (
                     <li key={b} className="flex gap-2 text-sm leading-relaxed text-text/90">
