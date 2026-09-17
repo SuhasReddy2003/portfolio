@@ -4,19 +4,25 @@ import { useState } from "react";
 import { ArrowUpRight, ChevronDown, Github } from "lucide-react";
 import type { Project } from "@/data/projects";
 import { cn } from "@/lib/utils";
+import { PipelineFlow } from "./visuals/pipeline-flow";
+import { RaftlineCluster } from "./visuals/raftline-cluster";
 
 export function ProjectCard({ project }: { project: Project }) {
   const [open, setOpen] = useState(false);
 
   return (
     <div
+      id={project.slug}
       className={cn(
-        "flex flex-col border border-border bg-surface p-6 transition-colors hover:border-text/30 sm:p-7",
+        "group flex scroll-mt-24 flex-col border border-border bg-surface p-6 transition-colors hover:border-text/30 sm:p-7",
         project.featured && "sm:col-span-2"
       )}
     >
       <div className="flex items-start justify-between gap-4">
-        <h3 className="text-lg font-medium tracking-tight">{project.name}</h3>
+        <div>
+          <span className="font-mono text-[11px] text-muted">{project.domainTag}</span>
+          <h3 className="mt-1 text-lg font-medium tracking-tight">{project.name}</h3>
+        </div>
         <div className="flex shrink-0 items-center gap-3 text-muted">
           {project.github && (
             <a
@@ -35,7 +41,7 @@ export function ProjectCard({ project }: { project: Project }) {
               target="_blank"
               rel="noreferrer"
               aria-label={`${project.name} live demo`}
-              className="transition-colors hover:text-text"
+              className="transition-all hover:text-text group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
             >
               <ArrowUpRight size={16} />
             </a>
@@ -46,7 +52,11 @@ export function ProjectCard({ project }: { project: Project }) {
       <p className="mt-2 text-sm text-muted">{project.tagline}</p>
       <p className="mt-4 text-sm leading-relaxed text-text/90">{project.description}</p>
 
-      <ul className="mt-4 flex flex-col gap-1.5">
+      <div className="mt-5">
+        <ProjectVisual project={project} />
+      </div>
+
+      <ul className="mt-5 flex flex-col gap-1.5">
         {project.highlights.map((h) => (
           <li key={h} className="flex gap-2 text-sm text-muted">
             <span aria-hidden className="mt-2 h-1 w-1 shrink-0 rounded-full bg-muted" />
@@ -59,7 +69,7 @@ export function ProjectCard({ project }: { project: Project }) {
         {project.tags.map((tag) => (
           <span
             key={tag}
-            className="rounded border border-border px-2 py-0.5 font-mono text-xs text-muted"
+            className="rounded border border-border px-2 py-0.5 font-mono text-xs text-muted transition-colors group-hover:border-text/25 group-hover:text-text/80"
           >
             {tag}
           </span>
@@ -92,7 +102,7 @@ export function ProjectCard({ project }: { project: Project }) {
             onClick={() => setOpen((v) => !v)}
             className="ml-auto inline-flex items-center gap-1 text-muted transition-colors hover:text-text"
           >
-            Case study
+            {project.featured ? "View Case Study" : "Case study"}
             <ChevronDown
               size={14}
               className={cn("transition-transform", open && "rotate-180")}
@@ -106,9 +116,7 @@ export function ProjectCard({ project }: { project: Project }) {
           <CaseStudyBlock title="Problem" text={project.caseStudy.problem} />
           <CaseStudyBlock title="Architecture" text={project.caseStudy.architecture} />
           <div>
-            <h4 className="text-sm font-medium text-text">
-              Technical decisions
-            </h4>
+            <h4 className="text-sm font-medium text-text">Technical decisions</h4>
             <ul className="mt-2 flex flex-col gap-1.5">
               {project.caseStudy.decisions.map((d) => (
                 <li key={d} className="flex gap-2 text-sm text-text/90">
@@ -124,6 +132,42 @@ export function ProjectCard({ project }: { project: Project }) {
       )}
     </div>
   );
+}
+
+function ProjectVisual({ project }: { project: Project }) {
+  switch (project.slug) {
+    case "resolveai":
+      return (
+        <PipelineFlow
+          size="lg"
+          nodes={[
+            { label: "User Question" },
+            { label: "Embedding" },
+            { label: "Vector Search" },
+            { label: "Relevant Knowledge" },
+            { label: "LLM", accent: true },
+            { label: "Suggested Response" },
+            { label: "Human Review", sublabel: "edge cases only", branch: true },
+          ]}
+        />
+      );
+    case "raftline":
+      return <RaftlineCluster />;
+    case "mdxblocks-assistant":
+      return (
+        <PipelineFlow
+          nodes={[
+            { label: "User" },
+            { label: "Language Detection" },
+            { label: "NLP / Retrieval" },
+            { label: "AI Response", accent: true },
+            { label: "Student / Parent / Teacher" },
+          ]}
+        />
+      );
+    default:
+      return null;
+  }
 }
 
 function CaseStudyBlock({ title, text }: { title: string; text: string }) {

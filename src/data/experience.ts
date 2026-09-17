@@ -4,6 +4,8 @@ export type ExperienceEntry = {
   location: string;
   dates?: string;
   bullets: string[];
+  tags?: string[];
+  workLink?: { label: string; href: string };
 };
 
 export const experience: ExperienceEntry[] = [
@@ -17,6 +19,8 @@ export const experience: ExperienceEntry[] = [
       "Integrated multilingual NLP, expanding access to 3+ regional languages and reducing support dependency",
       "Optimized the backend with asynchronous processing and load balancing, achieving 99.5% uptime and 35% lower latency across 200+ use cases",
     ],
+    tags: ["Python", "React", "MongoDB", "NLP"],
+    workLink: { label: "View work", href: "#mdxblocks-assistant" },
   },
   {
     company: "PAMP Technologies",
@@ -28,6 +32,7 @@ export const experience: ExperienceEntry[] = [
       "Created and executed 150+ unit tests, achieving 98% code coverage",
       "Identified and fixed bugs using debugging tools, minimizing downtime",
     ],
+    tags: ["Java", "REST APIs"],
   },
   {
     company: "Yantra, VIT Vellore",
@@ -58,7 +63,7 @@ export type EducationEntry = {
 export const education: EducationEntry[] = [
   {
     school: "University of Southern California",
-    degree: "M.S. Computer Science (Artificial Intelligence)",
+    degree: "M.S. Computer Science",
     dates: "2026 — 2028 (Expected)",
   },
   {

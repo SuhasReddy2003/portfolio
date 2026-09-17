@@ -73,6 +73,20 @@ function GridBackdrop() {
         </pattern>
       </defs>
       <rect width="100%" height="100%" fill="url(#grid)" />
+
+      {/* A few faint connected nodes, positioned toward the right where the
+          hero text doesn't reach — reads as "systems" texture, not decoration. */}
+      <g className="text-border" stroke="currentColor" strokeWidth="1" opacity="0.9">
+        <line x1="78%" y1="18%" x2="90%" y2="30%" />
+        <line x1="90%" y1="30%" x2="90%" y2="52%" />
+        <line x1="90%" y1="30%" x2="99%" y2="24%" />
+      </g>
+      <g fill="var(--grid-line)">
+        <circle cx="78%" cy="18%" r="2.5" />
+        <circle cx="90%" cy="30%" r="2.5" />
+        <circle cx="90%" cy="52%" r="2.5" />
+        <circle cx="99%" cy="24%" r="2.5" />
+      </g>
     </svg>
   );
 }
