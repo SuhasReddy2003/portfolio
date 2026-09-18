@@ -34,7 +34,6 @@ const stages = [
     items: ["RAG", "NLP", "Embeddings"],
     snippet:
       "const context = await search(query)\nconst res = await llm.complete({\n  prompt: query,\n  context,\n})",
-    accent: true,
   },
   {
     label: "Infrastructure",
@@ -46,17 +45,45 @@ const stages = [
 ];
 
 export function EngineeringApproach() {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const isTerminal = activeIndex !== null;
+
   return (
-    <section id="about" className="border-b border-border">
+    <section
+      id="about"
+      className="border-b border-border transition-colors duration-500"
+      style={{ backgroundColor: isTerminal ? "#050505" : "var(--bg)" }}
+    >
       <div className="container-page py-20 sm:py-24">
-        <h2 className="text-2xl font-medium tracking-tight sm:text-3xl">How I Build</h2>
-        <p className="mt-2 text-muted">
+        <h2
+          className={cn(
+            "text-2xl font-medium tracking-tight transition-colors duration-500 sm:text-3xl",
+            isTerminal ? "text-green-400" : "text-text"
+          )}
+        >
+          How I Build
+        </h2>
+        <p
+          className={cn(
+            "mt-2 transition-colors duration-500",
+            isTerminal ? "text-green-400/40" : "text-muted"
+          )}
+        >
           The layers I think in, from what a user touches down to what keeps it running.
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row">
           {stages.map((stage, i) => (
-            <Stage key={stage.label} stage={stage} isFirst={i === 0} isLast={i === stages.length - 1} />
+            <Stage
+              key={stage.label}
+              stage={stage}
+              isFirst={i === 0}
+              isLast={i === stages.length - 1}
+              isActive={activeIndex === i}
+              isDimmed={isTerminal && activeIndex !== i}
+              onActivate={() => setActiveIndex(i)}
+              onDeactivate={() => setActiveIndex((cur) => (cur === i ? null : cur))}
+            />
           ))}
         </div>
       </div>
@@ -68,21 +95,30 @@ function Stage({
   stage,
   isFirst,
   isLast,
+  isActive,
+  isDimmed,
+  onActivate,
+  onDeactivate,
 }: {
   stage: (typeof stages)[number];
   isFirst: boolean;
   isLast: boolean;
+  isActive: boolean;
+  isDimmed: boolean;
+  onActivate: () => void;
+  onDeactivate: () => void;
 }) {
   const Icon = stage.icon;
-  const [hovered, setHovered] = useState(false);
   const [typed, setTyped] = useState("");
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [done, setDone] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (timer.current) clearInterval(timer.current);
+    if (timer.current) clearTimeout(timer.current);
 
-    if (!hovered) {
+    if (!isActive) {
       setTyped("");
+      setDone(false);
       return;
     }
 
@@ -92,63 +128,110 @@ function Stage({
 
     if (reduceMotion) {
       setTyped(stage.snippet);
+      setDone(true);
       return;
     }
 
     let i = 0;
-    timer.current = setInterval(() => {
+    const typeNext = () => {
       i += 1;
       setTyped(stage.snippet.slice(0, i));
-      if (i >= stage.snippet.length && timer.current) {
-        clearInterval(timer.current);
+      if (i >= stage.snippet.length) {
+        setDone(true);
+        return;
       }
-    }, 18);
+      const prevChar = stage.snippet[i - 1];
+      // Irregular, human/streaming-like cadence: brief pause after
+      // newlines and punctuation, small jitter everywhere else.
+      const base = prevChar === "\n" ? 140 : /[,;(){}]/.test(prevChar) ? 60 : 14 + Math.random() * 24;
+      timer.current = setTimeout(typeNext, base);
+    };
+    timer.current = setTimeout(typeNext, 80);
 
     return () => {
-      if (timer.current) clearInterval(timer.current);
+      if (timer.current) clearTimeout(timer.current);
     };
-  }, [hovered, stage.snippet]);
+  }, [isActive, stage.snippet]);
 
   return (
     <div
       className="group flex flex-1 items-stretch"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
-      onBlur={() => setHovered(false)}
+      onMouseEnter={onActivate}
+      onMouseLeave={onDeactivate}
+      onFocus={onActivate}
+      onBlur={onDeactivate}
     >
       <div
         className={cn(
-          "flex-1 border border-border p-5 transition-colors group-hover:border-text/30",
+          "relative flex-1 overflow-hidden border p-5 transition-all duration-300",
           !isFirst && "sm:border-l-0",
-          stage.accent && "group-hover:border-accent/40"
+          isActive
+            ? "z-10 scale-[1.03] border-green-500/60 shadow-[0_0_30px_-4px_rgba(74,222,128,0.35)]"
+            : "border-border",
+          isDimmed && "opacity-30 saturate-50"
         )}
       >
+        {isActive && (
+          <div aria-hidden className="terminal-scanlines pointer-events-none absolute inset-0" />
+        )}
+
         <Icon
           size={16}
           className={cn(
-            "transition-colors",
-            stage.accent ? "text-accent" : "text-muted group-hover:text-text"
+            "relative transition-colors duration-300",
+            isActive ? "text-green-400" : "text-muted group-hover:text-text"
           )}
         />
-        <h3 className="mt-3 font-mono text-xs uppercase tracking-wide text-text">{stage.label}</h3>
-        <p className="mt-1.5 text-xs leading-relaxed text-muted">{stage.blurb}</p>
-        <p className="mt-3 text-xs text-text/70">{stage.items.join(" · ")}</p>
+        <h3
+          className={cn(
+            "relative mt-3 font-mono text-xs uppercase tracking-wide transition-colors duration-300",
+            isActive ? "text-green-400" : "text-text"
+          )}
+        >
+          {stage.label}
+        </h3>
+        <p
+          className={cn(
+            "relative mt-1.5 text-xs leading-relaxed transition-colors duration-300",
+            isActive ? "text-green-400/50" : "text-muted"
+          )}
+        >
+          {stage.blurb}
+        </p>
+        <p
+          className={cn(
+            "relative mt-3 text-xs transition-colors duration-300",
+            isActive ? "text-green-400/70" : "text-text/70"
+          )}
+        >
+          {stage.items.join(" · ")}
+        </p>
 
-        <div className="mt-3 min-h-[5.5rem] border-t border-border pt-2">
-          <p className="whitespace-pre-wrap break-words font-mono text-[10px] leading-relaxed text-green-500 dark:text-green-400">
-            {typed}
-            {hovered && typed.length < stage.snippet.length && (
-              <span aria-hidden className="animate-pulse">
-                ▍
-              </span>
-            )}
-          </p>
+        <div
+          className={cn(
+            "relative mt-3 min-h-[5.5rem] border-t pt-2 transition-colors duration-300",
+            isActive ? "border-green-500/30" : "border-border"
+          )}
+        >
+          {isActive && (
+            <p className="whitespace-pre-wrap break-words font-mono text-[10px] leading-relaxed text-green-400">
+              <span className="text-green-400/40">{"> "}</span>
+              {typed}
+              {!done && <span aria-hidden className="terminal-cursor text-green-400">▍</span>}
+            </p>
+          )}
         </div>
       </div>
       {!isLast && (
         <div aria-hidden className="hidden w-5 shrink-0 items-center justify-center sm:flex">
-          <span className="text-muted transition-colors group-hover:text-accent">→</span>
+          <span
+            className={cn(
+              "transition-colors duration-300",
+              isActive || isDimmed ? "text-green-500/20" : "text-muted group-hover:text-accent"
+            )}
+          >
+            →
+          </span>
         </div>
       )}
     </div>
