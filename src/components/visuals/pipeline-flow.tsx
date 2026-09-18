@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useInView } from "@/lib/use-in-view";
 
@@ -16,17 +16,32 @@ export type PipelineNode = {
 export function PipelineFlow({
   nodes,
   size = "sm",
-  pulse = false,
+  sequence = false,
 }: {
   nodes: PipelineNode[];
   size?: "sm" | "lg";
-  pulse?: boolean;
+  sequence?: boolean; // slow, looping "data flowing through the system" highlight
 }) {
   const { ref, inView } = useInView<HTMLDivElement>(0.25);
   const [hovered, setHovered] = useState<string | null>(null);
+  const [activeStep, setActiveStep] = useState(0);
   const main = nodes.filter((n) => !n.branch);
   const branch = nodes.find((n) => n.branch);
   const hasExplanations = nodes.some((n) => n.explain);
+  const stepCount = main.length + (branch ? 1 : 0);
+
+  useEffect(() => {
+    if (!sequence || !inView) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    const interval = setInterval(() => {
+      setActiveStep((s) => (s + 1) % stepCount);
+    }, 550);
+    return () => clearInterval(interval);
+  }, [sequence, inView, stepCount]);
+
+  const sequenceActive = sequence && inView && hovered === null;
 
   return (
     <div ref={ref} className="rounded-md border border-border bg-bg/50 p-4">
@@ -40,9 +55,14 @@ export function PipelineFlow({
               show={inView}
               onHover={hasExplanations ? setHovered : undefined}
               active={hovered === node.label}
+              flowing={sequenceActive && activeStep === i}
             />
             {i < main.length - 1 && (
-              <Connector show={inView} delay={i} pulse={pulse && inView} pulseDelay={i} />
+              <Connector
+                show={inView}
+                delay={i}
+                active={sequenceActive && activeStep === i}
+              />
             )}
           </Fragment>
         ))}
@@ -58,6 +78,7 @@ export function PipelineFlow({
             show={inView}
             onHover={hasExplanations ? setHovered : undefined}
             active={hovered === branch.label}
+            flowing={sequenceActive && activeStep === main.length}
           />
           {branch.mockButtons && (
             <div className="flex gap-1.5">
@@ -90,6 +111,7 @@ function Node({
   show,
   onHover,
   active,
+  flowing,
 }: {
   node: PipelineNode;
   size: "sm" | "lg";
@@ -97,6 +119,7 @@ function Node({
   show: boolean;
   onHover?: (label: string | null) => void;
   active: boolean;
+  flowing?: boolean;
 }) {
   const interactive = Boolean(onHover && node.explain);
   return (
@@ -113,6 +136,7 @@ function Node({
         interactive && "cursor-default hover:border-text/40",
         active && !node.accent && "border-text/50",
         active && node.accent && "border-accent/70",
+        flowing && "border-accent/60 bg-accent/[0.06]",
         show ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
       )}
       style={{ transitionDelay: show ? `${delay * 90}ms` : "0ms" }}
@@ -128,32 +152,20 @@ function Node({
 function Connector({
   show,
   delay,
-  pulse,
-  pulseDelay,
+  active,
 }: {
   show: boolean;
   delay: number;
-  pulse: boolean;
-  pulseDelay: number;
+  active: boolean;
 }) {
   return (
     <div
       className={cn(
-        "relative mx-auto h-3 w-px shrink-0 bg-border transition-opacity duration-500 sm:mx-1 sm:h-px sm:w-3 sm:flex-none",
+        "mx-auto h-3 w-px shrink-0 transition-colors duration-300 sm:mx-1 sm:h-px sm:w-3 sm:flex-none",
+        active ? "bg-accent/60" : "bg-border",
         show ? "opacity-100" : "opacity-0"
       )}
       style={{ transitionDelay: show ? `${delay * 90 + 40}ms` : "0ms" }}
-    >
-      {pulse && (
-        <span
-          aria-hidden
-          className="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/70 sm:left-0 sm:top-1/2 sm:translate-x-0"
-          style={{
-            animation: "pipeline-pulse 2.6s ease-in-out infinite",
-            animationDelay: `${pulseDelay * 0.35}s`,
-          }}
-        />
-      )}
-    </div>
+    />
   );
 }

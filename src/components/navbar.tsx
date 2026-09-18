@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Github, Linkedin, Menu, X } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
+import { useActiveSection } from "@/lib/use-active-section";
+import { cn } from "@/lib/utils";
 
 const links = [
   { href: "#about", label: "About" },
@@ -17,6 +19,7 @@ const LINKEDIN_URL = "https://www.linkedin.com/in/suhas-reddy-05643b247/";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const active = useActiveSection(links.map((l) => l.href.slice(1)));
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-bg/85 backdrop-blur">
@@ -29,7 +32,13 @@ export function Navbar() {
           <ul className="flex items-center gap-6 text-sm text-muted">
             {links.map((link) => (
               <li key={link.href}>
-                <a href={link.href} className="transition-colors hover:text-text">
+                <a
+                  href={link.href}
+                  className={cn(
+                    "transition-colors hover:text-text",
+                    active === link.href.slice(1) && "text-text"
+                  )}
+                >
                   {link.label}
                 </a>
               </li>

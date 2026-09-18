@@ -50,12 +50,12 @@ export function EngineeringApproach() {
           {stages.map((stage, i) => {
             const Icon = stage.icon;
             return (
-              <div key={stage.label} className="flex flex-1 items-stretch">
+              <div key={stage.label} className="group flex flex-1 items-stretch">
                 <div
                   className={cn(
-                    "group flex-1 border border-border p-5 transition-colors hover:border-text/30",
+                    "flex-1 border border-border p-5 transition-colors group-hover:border-text/30",
                     i > 0 && "sm:border-l-0",
-                    stage.accent && "hover:border-accent/40"
+                    stage.accent && "group-hover:border-accent/40"
                   )}
                 >
                   <Icon
@@ -76,7 +76,7 @@ export function EngineeringApproach() {
                     aria-hidden
                     className="hidden w-5 shrink-0 items-center justify-center sm:flex"
                   >
-                    <span className="text-muted">→</span>
+                    <span className="text-muted transition-colors group-hover:text-accent">→</span>
                   </div>
                 )}
               </div>

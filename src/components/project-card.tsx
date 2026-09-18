@@ -140,7 +140,7 @@ function ProjectVisual({ project }: { project: Project }) {
       return (
         <PipelineFlow
           size="lg"
-          pulse
+          sequence
           nodes={[
             {
               label: "User Question",
