@@ -10,11 +10,10 @@ const NODE_COUNT = 4;
 const MAX_LOG = 5;
 
 export function RaftlineCluster() {
-  const [leaderIndex, setLeaderIndex] = useState(0);
   const [roles, setRoles] = useState<NodeRole[]>(["leader", "follower", "follower", "follower"]);
   const [term, setTerm] = useState(1);
   const [commitIndex, setCommitIndex] = useState(0);
-  const [followerSynced, setFollowerSynced] = useState([true, true, true]);
+  const [synced, setSynced] = useState([true, true, true, true]);
   const [status, setStatus] = useState<Status>("idle");
   const [electionPhase, setElectionPhase] = useState<"timeout" | "voting" | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
@@ -29,6 +28,8 @@ export function RaftlineCluster() {
     timers.current.push(setTimeout(fn, delay));
   }
 
+  const leaderIndex = roles.indexOf("leader");
+
   function runElection() {
     if (status !== "idle") return;
     setStatus("electing");
@@ -36,43 +37,49 @@ export function RaftlineCluster() {
     const current = leaderIndex;
     const next = (current + 1) % NODE_COUNT;
 
+    // Step 1: the current leader goes offline.
     schedule(() => {
       setRoles((r) => r.map((role, i) => (i === current ? "timeout" : role)));
       setElectionPhase("timeout");
     }, 0);
 
+    // Step 2: the next node in the ring detects the timeout and campaigns.
     schedule(() => {
       setRoles((r) => r.map((role, i) => (i === next ? "candidate" : role)));
       setElectionPhase("voting");
-    }, 600);
+    }, 700);
 
+    // Step 3: the candidate wins the majority and becomes leader. Every
+    // other node — including the one that just timed out — settles as
+    // a follower of the *new* leader.
     schedule(() => {
-      setLeaderIndex(next);
       setRoles((r) => r.map((_, i) => (i === next ? "leader" : "follower")));
       setTerm((t) => t + 1);
       setStatus("idle");
       setElectionPhase(null);
-    }, 1300);
+    }, 1500);
   }
 
   function runReplication() {
     if (status !== "idle" || commitIndex >= MAX_LOG) return;
     setStatus("replicating");
-    setFollowerSynced([false, false, false]);
+
+    const followers = Array.from({ length: NODE_COUNT }, (_, i) => i).filter(
+      (i) => i !== leaderIndex
+    );
+    setSynced((s) => s.map((v, i) => (i === leaderIndex ? v : false)));
 
     schedule(() => setCommitIndex((c) => c + 1), 150);
-    schedule(() => setFollowerSynced([true, false, false]), 500);
-    schedule(() => setFollowerSynced([true, true, false]), 850);
-    schedule(() => {
-      setFollowerSynced([true, true, true]);
-      setStatus("idle");
-    }, 1200);
+    followers.forEach((idx, pos) => {
+      schedule(() => {
+        setSynced((s) => s.map((v, i) => (i === idx ? true : v)));
+      }, 500 + pos * 350);
+    });
+    schedule(
+      () => setStatus("idle"),
+      500 + followers.length * 350 + 150
+    );
   }
-
-  const followerIdx = Array.from({ length: NODE_COUNT }, (_, i) => i).filter(
-    (i) => i !== leaderIndex
-  );
-  const leaderHovered = hovered === leaderIndex;
 
   return (
     <div className="rounded-md border border-border bg-bg/50 p-4 font-mono">
@@ -89,37 +96,27 @@ export function RaftlineCluster() {
         </span>
       </div>
 
-      <div className="mt-5 flex flex-col items-center gap-3">
-        <ClusterNode
-          index={leaderIndex}
-          role={roles[leaderIndex]}
-          label="Node 1"
-          log={commitIndex}
-          hovered={hovered === leaderIndex}
-          onHover={setHovered}
+      <div className="relative mt-5">
+        {/* Underline that slides to whichever physical node currently holds
+            the leader role — the one honest indicator of "who's in charge"
+            that doesn't depend on relabeling nodes. */}
+        <div className="absolute -top-1 left-0 h-px w-full bg-border" aria-hidden />
+        <div
+          className="absolute -top-1 h-px bg-accent transition-all duration-500"
+          style={{ width: `${100 / NODE_COUNT}%`, left: `${(leaderIndex * 100) / NODE_COUNT}%` }}
+          aria-hidden
         />
 
-        <div className="flex w-full flex-wrap items-start justify-center gap-x-6 gap-y-3 sm:gap-x-10">
-          {followerIdx.map((i, pos) => (
-            <div key={i} className="flex flex-col items-center gap-1">
-              <div
-                className={cn(
-                  "h-5 w-px transition-colors sm:h-7",
-                  leaderHovered || hovered === i || !followerSynced[pos]
-                    ? "bg-accent/50"
-                    : "bg-border"
-                )}
-              />
-              <ClusterNode
-                index={i}
-                role={roles[i]}
-                label={`Node ${pos + 2}`}
-                log={followerSynced[pos] ? commitIndex : Math.max(commitIndex - 1, 0)}
-                small
-                hovered={hovered === i}
-                onHover={setHovered}
-              />
-            </div>
+        <div className="grid grid-cols-2 gap-3 pt-4 sm:grid-cols-4">
+          {roles.map((role, i) => (
+            <ClusterNode
+              key={i}
+              index={i}
+              role={role}
+              log={synced[i] ? commitIndex : Math.max(commitIndex - 1, 0)}
+              hovered={hovered === i}
+              onHover={setHovered}
+            />
           ))}
         </div>
       </div>
@@ -159,17 +156,13 @@ export function RaftlineCluster() {
 function ClusterNode({
   index,
   role,
-  label,
   log,
-  small,
   hovered,
   onHover,
 }: {
   index: number;
   role: NodeRole;
-  label: string;
   log: number;
-  small?: boolean;
   hovered: boolean;
   onHover: (i: number | null) => void;
 }) {
@@ -186,21 +179,19 @@ function ClusterNode({
     <div className="flex flex-col items-center gap-1.5">
       <button
         type="button"
-        tabIndex={0}
         onMouseEnter={() => onHover(index)}
         onMouseLeave={() => onHover(null)}
         onFocus={() => onHover(index)}
         onBlur={() => onHover(null)}
         className={cn(
-          "rounded border px-3 py-1.5 text-center transition-colors",
-          small ? "text-[10px]" : "text-[11px]",
+          "w-full rounded border px-3 py-1.5 text-center text-[11px] transition-colors",
           (role === "leader" || role === "candidate") && "border-accent/50 text-accent",
           role === "timeout" && "border-border text-muted opacity-50",
           role === "follower" && "border-border text-text",
           hovered && "border-text/60"
         )}
       >
-        <div className="text-muted">{label}</div>
+        <div className="text-muted">Node {index + 1}</div>
         <div className="mt-0.5">{roleLabel}</div>
       </button>
       <div className="flex gap-0.5" aria-hidden>

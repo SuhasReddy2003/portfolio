@@ -71,6 +71,14 @@ export function EngineeringApproach() {
         >
           The layers I think in, from what a user touches down to what keeps it running.
         </p>
+        <p
+          className={cn(
+            "mt-1 font-mono text-[11px] transition-colors duration-500",
+            isTerminal ? "text-green-400/30" : "text-muted/70"
+          )}
+        >
+          Hover a layer to see it in code →
+        </p>
 
         <div className="mt-10 flex flex-col sm:flex-row">
           {stages.map((stage, i) => (
