@@ -4,8 +4,9 @@ import { useState } from "react";
 import { ArrowUpRight, ChevronDown, Github } from "lucide-react";
 import type { Project } from "@/data/projects";
 import { cn } from "@/lib/utils";
-import { PipelineFlow } from "./visuals/pipeline-flow";
 import { RaftlineCluster } from "./visuals/raftline-cluster";
+import { ResolveAIRag } from "./visuals/resolveai-rag";
+import { MdxblocksPipeline } from "./visuals/mdxblocks-pipeline";
 
 export function ProjectCard({ project }: { project: Project }) {
   const [open, setOpen] = useState(false);
@@ -137,60 +138,11 @@ export function ProjectCard({ project }: { project: Project }) {
 function ProjectVisual({ project }: { project: Project }) {
   switch (project.slug) {
     case "resolveai":
-      return (
-        <PipelineFlow
-          size="lg"
-          sequence
-          nodes={[
-            {
-              label: "User Question",
-              explain: "A customer submits a support ticket in natural language.",
-            },
-            {
-              label: "Embedding",
-              explain: "The question is converted into a vector representation.",
-            },
-            {
-              label: "Vector Search",
-              explain: "Retrieves semantically similar knowledge using pgvector.",
-            },
-            {
-              label: "Relevant Knowledge",
-              explain: "The closest-matching chunks from the knowledge base.",
-            },
-            {
-              label: "LLM",
-              accent: true,
-              explain: "Generates a grounded response from the retrieved context.",
-            },
-            {
-              label: "Suggested Response",
-              explain: "Auto-sent for high-confidence matches — 70%+ of routine queries.",
-            },
-            {
-              label: "Human Review",
-              sublabel: "edge cases only",
-              branch: true,
-              explain: "An agent queue handles anything outside the confidence range.",
-              mockButtons: ["Accept", "Edit", "Reject"],
-            },
-          ]}
-        />
-      );
+      return <ResolveAIRag />;
     case "raftline":
       return <RaftlineCluster />;
     case "mdxblocks-assistant":
-      return (
-        <PipelineFlow
-          nodes={[
-            { label: "User" },
-            { label: "Language Detection" },
-            { label: "NLP / Retrieval" },
-            { label: "AI Response", accent: true },
-            { label: "Student / Parent / Teacher" },
-          ]}
-        />
-      );
+      return <MdxblocksPipeline />;
     default:
       return null;
   }

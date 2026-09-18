@@ -16,6 +16,7 @@ export function RaftlineCluster() {
   const [commitIndex, setCommitIndex] = useState(0);
   const [followerSynced, setFollowerSynced] = useState([true, true, true]);
   const [status, setStatus] = useState<Status>("idle");
+  const [electionPhase, setElectionPhase] = useState<"timeout" | "voting" | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -37,10 +38,12 @@ export function RaftlineCluster() {
 
     schedule(() => {
       setRoles((r) => r.map((role, i) => (i === current ? "timeout" : role)));
+      setElectionPhase("timeout");
     }, 0);
 
     schedule(() => {
       setRoles((r) => r.map((role, i) => (i === next ? "candidate" : role)));
+      setElectionPhase("voting");
     }, 600);
 
     schedule(() => {
@@ -48,6 +51,7 @@ export function RaftlineCluster() {
       setRoles((r) => r.map((_, i) => (i === next ? "leader" : "follower")));
       setTerm((t) => t + 1);
       setStatus("idle");
+      setElectionPhase(null);
     }, 1300);
   }
 
@@ -123,6 +127,11 @@ export function RaftlineCluster() {
       <div className="mt-5 flex items-center justify-center gap-6 text-[11px] text-muted">
         <span>Term {term}</span>
         <span>Commit Index {commitIndex}</span>
+      </div>
+
+      <div className="mt-1.5 min-h-[1rem] text-center text-[10px] text-muted">
+        {electionPhase === "timeout" && "Leader unreachable — followers detecting timeout"}
+        {electionPhase === "voting" && "Candidate requesting votes from peers"}
       </div>
 
       <div className="mt-4 flex justify-center gap-2">
