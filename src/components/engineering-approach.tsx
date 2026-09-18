@@ -122,16 +122,6 @@ function Stage({
       return;
     }
 
-    const reduceMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (reduceMotion) {
-      setTyped(stage.snippet);
-      setDone(true);
-      return;
-    }
-
     let i = 0;
     const typeNext = () => {
       i += 1;
